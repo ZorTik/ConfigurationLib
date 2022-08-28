@@ -5,6 +5,7 @@ import me.zort.configurationlib.util.NodeTypeToken;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +36,10 @@ public abstract class SectionNode<L> implements Node<L> {
         for(Node<L> node : getNodes()) {
             try {
                 Field field = typeClass.getDeclaredField(node.getName());
+                if(Modifier.isTransient(field.getModifiers())) {
+                    // Transient fields are skipped.
+                    continue;
+                }
                 field.setAccessible(true);
                 Object value = null;
                 if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
