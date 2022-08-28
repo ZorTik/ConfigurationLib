@@ -19,6 +19,9 @@ public final class ConfigurationLibBukkit {
 
     public static File prepareDataFile(Plugin plugin, String name) {
         File file = new File(plugin.getDataFolder(), name);
+        if(!file.exists() && plugin.getResource(name) != null) {
+            plugin.saveResource(name, false);
+        }
         return prepareDataFile(file);
     }
 
