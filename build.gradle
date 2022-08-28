@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+group 'me.zort'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'spigotmc-repo'
+        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+}
+
+dependencies {
+    implementation group: 'org.jetbrains', name: 'annotations', version: '20.1.0'
+    compileOnly 'org.spigotmc:spigot-api:1.18.1-R0.1-SNAPSHOT'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.github.ZorTik'
+            artifactId = 'ConfigurationLib'
+            version = '1.0'
+
+            from components.java
+            pom {
+                name = 'ConfigurationLib'
+                description = 'Simple configuration library with mapping for Bukkit!'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://raw.githubusercontent.com/ZorTik/ConfigurationLib/master/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'zort'
+                        name = 'ZorTik'
+                        email = 'zortlegit@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
