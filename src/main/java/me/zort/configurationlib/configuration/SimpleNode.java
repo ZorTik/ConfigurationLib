@@ -6,6 +6,11 @@ public interface SimpleNode<L> extends Node<L> {
 
     Object get();
 
+    default Object orElse(Object other) {
+        Object value = get();
+        return value != null ? value : other;
+    }
+
     default String getAsString() throws ConfigurationException {
         if(!isString()) throw new ConfigurationException(this, "Node " + getName() + " is not string!");
         return (String) get();
