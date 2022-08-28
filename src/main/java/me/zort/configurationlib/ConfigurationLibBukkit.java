@@ -13,7 +13,7 @@ public final class ConfigurationLibBukkit {
     }
 
     public static BukkitFileConfigurationNode of(File file, boolean create) {
-        if(create && prepareDataFile(file) == null) return null;
+        if((create && prepareDataFile(file) == null) || (!create && !file.exists())) return null;
         return new BukkitFileConfigurationNode(file);
     }
 
