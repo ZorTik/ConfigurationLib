@@ -4,6 +4,7 @@ import me.zort.configurationlib.exception.ConfigurationException;
 
 public interface SimpleNode<L> extends Node<L> {
 
+    void set(Object value);
     Object get();
 
     default Object orElse(Object other) {

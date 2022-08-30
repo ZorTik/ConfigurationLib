@@ -1,6 +1,7 @@
 package me.zort.configurationlib.configuration;
 
 import com.google.common.primitives.Primitives;
+import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.util.NodeTypeToken;
 
 import java.lang.reflect.Field;
@@ -14,6 +15,45 @@ public abstract class SectionNode<L> implements Node<L> {
 
     public abstract Node<L> get(String path);
     public abstract Collection<Node<L>> getNodes();
+
+    /**
+     * Updates this node's values from the provided mapped
+     * object.
+     * This method does not create new nodes, only updates
+     * them!
+     *
+     * @param from The mapped object to update from.
+     */
+    public void set(Object from) {
+        if(isPrimitive(from.getClass())) {
+            // Primitive values can't be passed to sections!
+            return;
+        }
+        for(Field field : from.getClass().getDeclaredFields()) {
+            if(Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
+                continue;
+            }
+            field.setAccessible(true);
+            try {
+                Object value = field.get(from);
+                if(value == null) {
+                    continue;
+                }
+                String name;
+                if(field.isAnnotationPresent(NodeName.class)) {
+                    name = field.getAnnotation(NodeName.class).value();
+                } else {
+                    name = field.getName();
+                }
+                getNodes().stream()
+                        .filter(n -> n.getName().equals(name))
+                        .findFirst()
+                        .ifPresent(node -> node.set(value));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public <T> T map(Class<T> typeClass) {
         try {

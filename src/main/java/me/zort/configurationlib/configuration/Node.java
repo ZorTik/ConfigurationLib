@@ -18,6 +18,7 @@ public interface Node<L> {
      * @param location Location origin node.
      */
     void putSelf(L location);
+    void set(Object from);
     String getPath();
 
     default String getName() {
