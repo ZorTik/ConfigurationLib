@@ -7,11 +7,16 @@ public class BukkitSimpleNode implements SimpleNode<ConfigurationSection> {
 
     private final ConfigurationSection parent;
     private final String key;
-    private final Object value;
+    private Object value;
 
     public BukkitSimpleNode(ConfigurationSection parent, String key, Object value) {
         this.parent = parent;
         this.key = key;
+        this.value = value;
+    }
+
+    @Override
+    public void set(Object value) {
         this.value = value;
     }
 
