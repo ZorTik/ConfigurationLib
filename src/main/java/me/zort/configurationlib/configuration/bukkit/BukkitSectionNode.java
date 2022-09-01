@@ -43,6 +43,19 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         }
     }
 
+    /**
+     * @see SectionNode#buildValue(Field, Node)
+     */
+    @Override
+    public Object buildValue(Field field, Node<ConfigurationSection> node) {
+        // I'm specifying new field types for mapped objects.
+        if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {
+            return ((BukkitSectionNode) node).getAsItem();
+        }
+        // TODO: Add support for other types.
+        return super.buildValue(field, node);
+    }
+
     @Nullable
     @Override
     public Node<ConfigurationSection> get(String path) {

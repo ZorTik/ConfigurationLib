@@ -68,6 +68,14 @@ public abstract class SectionNode<L> implements Node<L> {
         }
     }
 
+    /**
+     * Tries top map this section to provided object. This method assigns values to the fields
+     * according to the node types and rules specified by child classes.
+     *
+     * @param obj The object to map to.
+     * @return The mapped object.
+     * @param <T> The type of the object to map to.
+     */
     public <T> T map(T obj) {
         Class<?> typeClass = obj.getClass();
         if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
@@ -81,12 +89,7 @@ public abstract class SectionNode<L> implements Node<L> {
                     continue;
                 }
                 field.setAccessible(true);
-                Object value = null;
-                if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
-                    value = ((SimpleNode<L>) node).get();
-                } else if(node instanceof SectionNode) {
-                    value = ((SectionNode<L>) node).map(field.getType());
-                }
+                Object value = buildValue(field, node);
                 if(value != null) {
                     // Null values are skipped.
                     try {
@@ -98,6 +101,32 @@ public abstract class SectionNode<L> implements Node<L> {
             } catch (NoSuchFieldException ignored) {}
         }
         return obj;
+    }
+
+    /**
+     * This method is used for building value for specific field in mapping class
+     * according to node. Field is found by getting field from class by name of the
+     * node.
+     * <p>
+     * After building (returning) the value in this method, the value is assigned
+     * to the field if is not null.
+     * <p>
+     * Reason for this method being separated from method where is used is that
+     * I want to allow child classes to override it and define their own field type
+     * rules.
+     *
+     * @param field Field to build value for.
+     * @param node Node to build value from.
+     * @return Value to assign to field.
+     */
+    public Object buildValue(Field field, Node<L> node) {
+        Object value = null;
+        if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
+            value = ((SimpleNode<L>) node).get();
+        } else if(node instanceof SectionNode) {
+            value = ((SectionNode<L>) node).map(field.getType());
+        }
+        return value;
     }
 
     public SimpleNode<L> getSimple(String path) {
