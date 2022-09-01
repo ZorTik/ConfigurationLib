@@ -23,3 +23,10 @@ item2:
     protection_fire: 1
   flags:
     hide_enchants: true
+
+item3:
+  type: head-<texture>
+  name: "I'm Head with custom texture!"
+  lore:
+    - "This is the first line"
+    - "This is the second line"
