@@ -1,0 +1,25 @@
+item:
+  type: STONE
+  data: 0
+  amount: 1
+  name: "Title"
+  lore:
+    - "This is the first line"
+    - "This is the second line"
+  # Automatically assigns enchantment
+  # and applies all flags.
+  enchanted: true
+
+item2:
+  type: STONE
+  data: 0
+  amount: 1
+  name: "Title"
+  lore:
+    - "This is the first line"
+    - "This is the second line"
+  enchantments:
+    protection_environmental: 1
+    protection_fire: 1
+  flags:
+    hide_enchants: true

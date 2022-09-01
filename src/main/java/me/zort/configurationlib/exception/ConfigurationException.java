@@ -6,9 +6,9 @@ import me.zort.configurationlib.configuration.Node;
 public class ConfigurationException extends RuntimeException {
 
     @Getter
-    private final Node node;
+    private final Node<?> node;
 
-    public ConfigurationException(Node node, String message) {
+    public ConfigurationException(Node<?> node, String message) {
         super(message);
         this.node = node;
     }
