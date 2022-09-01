@@ -3,6 +3,7 @@ package me.zort.configurationlib.configuration;
 import com.google.common.primitives.Primitives;
 import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.util.NodeTypeToken;
+import me.zort.configurationlib.util.Placeholders;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -56,16 +57,24 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     public <T> T map(Class<T> typeClass) {
+        return map(typeClass, new Placeholders());
+    }
+
+    public <T> T map(Class<T> typeClass, Placeholders placeholders) {
         try {
             if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
                 // We cannot map sections to primitive types since
                 // sections are not leaf nodes.
                 return null;
             }
-            return map(typeClass.getDeclaredConstructor().newInstance());
+            return map(typeClass.getDeclaredConstructor().newInstance(), placeholders);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public <T> T map(T obj) {
+        return map(obj, new Placeholders());
     }
 
     /**
@@ -76,7 +85,7 @@ public abstract class SectionNode<L> implements Node<L> {
      * @return The mapped object.
      * @param <T> The type of the object to map to.
      */
-    public <T> T map(T obj) {
+    public <T> T map(T obj, Placeholders placeholders) {
         Class<?> typeClass = obj.getClass();
         if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
             return null;
@@ -89,7 +98,7 @@ public abstract class SectionNode<L> implements Node<L> {
                     continue;
                 }
                 field.setAccessible(true);
-                Object value = buildValue(field, node);
+                Object value = buildValue(field, node, placeholders);
                 if(value != null) {
                     // Null values are skipped.
                     try {
@@ -119,7 +128,7 @@ public abstract class SectionNode<L> implements Node<L> {
      * @param node Node to build value from.
      * @return Value to assign to field.
      */
-    public Object buildValue(Field field, Node<L> node) {
+    public Object buildValue(Field field, Node<L> node, Placeholders placeholders) {
         Object value = null;
         if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
             value = ((SimpleNode<L>) node).get();

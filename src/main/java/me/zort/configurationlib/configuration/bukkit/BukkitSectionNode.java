@@ -5,6 +5,7 @@ import me.zort.configurationlib.configuration.Node;
 import me.zort.configurationlib.configuration.SectionNode;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
+import me.zort.configurationlib.util.Placeholders;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -44,16 +45,16 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     /**
-     * @see SectionNode#buildValue(Field, Node)
+     * @see SectionNode#buildValue(Field, Node, Placeholders)
      */
     @Override
-    public Object buildValue(Field field, Node<ConfigurationSection> node) {
+    public Object buildValue(Field field, Node<ConfigurationSection> node, Placeholders placeholders) {
         // I'm specifying new field types for mapped objects.
         if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {
-            return ((BukkitSectionNode) node).getAsItem();
+            return ((BukkitSectionNode) node).getAsItem(placeholders);
         }
         // TODO: Add support for other types.
-        return super.buildValue(field, node);
+        return super.buildValue(field, node, placeholders);
     }
 
     @Nullable
@@ -78,6 +79,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
 
     @Nullable
     public ItemStack getAsItem() {
+        return getAsItem(new Placeholders());
+    }
+
+    @Nullable
+    public ItemStack getAsItem(Placeholders placeholders) {
         if(!ItemValidator.validate(section)) {
             return null;
         }
@@ -103,8 +109,12 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
             meta = item.getItemMeta();
         }
         if(meta != null) {
-            if(section.contains("name")) meta.setDisplayName(Colorizer.colorize(section.getString("display-name")));
-            if(section.contains("lore")) meta.setLore(Colorizer.colorize(section.getStringList("lore")));
+            if(section.contains("name")) meta.setDisplayName(
+                    placeholders.replace(Colorizer.colorize(section.getString("display-name")))
+            );
+            if(section.contains("lore")) meta.setLore(
+                    placeholders.replace(Colorizer.colorize(section.getStringList("lore")))
+            );
             if(section.contains("enchanted") && section.getBoolean("enchanted")) {
                 meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
                 meta.addItemFlags(ItemFlag.values());
