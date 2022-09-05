@@ -110,7 +110,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         }
         if(meta != null) {
             if(section.contains("name")) meta.setDisplayName(
-                    placeholders.replace(Colorizer.colorize(section.getString("display-name")))
+                    placeholders.replace(Colorizer.colorize(section.getString("name")))
             );
             if(section.contains("lore")) meta.setLore(
                     placeholders.replace(Colorizer.colorize(section.getStringList("lore")))
