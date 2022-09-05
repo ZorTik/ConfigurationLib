@@ -3,6 +3,7 @@ package me.zort.configurationlib.configuration.bukkit;
 import lombok.Getter;
 import me.zort.configurationlib.configuration.Node;
 import me.zort.configurationlib.configuration.SectionNode;
+import me.zort.configurationlib.configuration.SimpleNode;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
 import me.zort.configurationlib.util.Placeholders;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,9 +54,21 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         // I'm specifying new field types for mapped objects.
         if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {
             return ((BukkitSectionNode) node).getAsItem(placeholders);
+        } else if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
+            Object listCandidate = ((BukkitSimpleNode) node).get();
+            if(listCandidate instanceof List) {
+                return listCandidate;
+            }
         }
         // TODO: Add support for other types.
         return super.buildValue(field, node, placeholders);
+    }
+
+    @Override
+    public SimpleNode<ConfigurationSection> getSimple(String path) {
+        // Just to simplify the usage.
+        if(!has(path)) return new BukkitSimpleNode(section, path, null);
+        return super.getSimple(path);
     }
 
     @Nullable
