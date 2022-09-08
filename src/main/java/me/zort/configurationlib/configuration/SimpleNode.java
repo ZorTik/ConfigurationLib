@@ -18,7 +18,12 @@ public interface SimpleNode<L> extends Node<L> {
     }
 
     default int getAsInt() {
-        return (int) getAsDouble();
+        Object obj = get();
+        try {
+            return (int) obj;
+        } catch(Exception ex) {
+            return Integer.parseInt(getAsString());
+        }
     }
 
     default double getAsDouble() {
