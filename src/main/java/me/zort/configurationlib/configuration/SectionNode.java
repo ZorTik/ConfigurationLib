@@ -8,6 +8,8 @@ import me.zort.configurationlib.util.Placeholders;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,7 +135,18 @@ public abstract class SectionNode<L> implements Node<L> {
         if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
             value = ((SimpleNode<L>) node).get();
         } else if(node instanceof SectionNode) {
-            value = ((SectionNode<L>) node).map(field.getType());
+            Class<?> contentType;
+            if(List.class.isAssignableFrom(field.getType())
+            && !isPrimitive(contentType = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0])) {
+                List list = new ArrayList();
+                ((SectionNode<Object>) node).getNodes(NodeTypes.SECTION)
+                        .forEach(sn -> {
+                            list.add(sn.map(contentType));
+                        });
+                return list;
+            } else {
+                value = ((SectionNode<L>) node).map(field.getType());
+            }
         }
         return value;
     }
