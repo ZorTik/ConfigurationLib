@@ -132,7 +132,7 @@ public abstract class SectionNode<L> implements Node<L> {
      */
     public Object buildValue(Field field, Node<L> node, Placeholders placeholders) {
         Object value = null;
-        if(node instanceof SimpleNode && isPrimitive(field.getClass())) {
+        if(node instanceof SimpleNode && isPrimitive(field.getType())) {
             value = ((SimpleNode<L>) node).get();
         } else if(node instanceof SectionNode) {
             Class<?> contentType;
