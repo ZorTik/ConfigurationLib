@@ -2,6 +2,7 @@ package me.zort.configurationlib.configuration;
 
 import com.google.common.primitives.Primitives;
 import me.zort.configurationlib.annotation.NodeName;
+import me.zort.configurationlib.annotation.ThisNodeId;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
 
@@ -132,6 +133,12 @@ public abstract class SectionNode<L> implements Node<L> {
      */
     public Object buildValue(Field field, Node<L> node, Placeholders placeholders) {
         Object value = null;
+
+        // See: me.zort.configurationlib.annotation.ThisNodeId
+        if(String.class.equals(field.getType()) && field.isAnnotationPresent(ThisNodeId.class)) {
+            return node.getName();
+        }
+
         if(node instanceof SimpleNode && isPrimitive(field.getType())) {
             value = ((SimpleNode<L>) node).get();
         } else if(node instanceof SectionNode) {
