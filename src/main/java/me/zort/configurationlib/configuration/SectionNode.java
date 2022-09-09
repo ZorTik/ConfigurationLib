@@ -168,8 +168,10 @@ public abstract class SectionNode<L> implements Node<L> {
                 .collect(Collectors.toList());
     }
 
+    // This includes also String, so it is not really primitive,
+    // but I named it like that, so I don't want to change it. :D
     private boolean isPrimitive(Class<?> clazz) {
-        return Primitives.isWrapperType(Primitives.wrap(clazz));
+        return Primitives.isWrapperType(Primitives.wrap(clazz)) || String.class.equals(clazz);
     }
 
 }
