@@ -65,10 +65,15 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     @Override
-    public SimpleNode<ConfigurationSection> getSimple(String path) {
+    public BukkitSimpleNode getSimple(String path) {
         // Just to simplify the usage.
         if(!has(path)) return new BukkitSimpleNode(section, path, null);
-        return super.getSimple(path);
+        return (BukkitSimpleNode) super.getSimple(path);
+    }
+
+    @Override
+    public BukkitSectionNode getSection(String path) {
+        return (BukkitSectionNode) super.getSection(path);
     }
 
     @Nullable
