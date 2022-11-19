@@ -125,6 +125,10 @@ public abstract class SectionNode<L> implements Node<L> {
         return map(obj, new Placeholders());
     }
 
+    public <T> T map(T obj, Placeholders placeholders) {
+        return map(obj, placeholders, true);
+    }
+
     /**
      * Tries top map this section to provided object. This method assigns values to the fields
      * according to the node types and rules specified by child classes.
@@ -134,13 +138,13 @@ public abstract class SectionNode<L> implements Node<L> {
      * @param <T> The type of the object to map to.
      */
     @SuppressWarnings("rawtypes, unchecked")
-    public <T> T map(T obj, Placeholders placeholders) {
+    public <T> T map(T obj, Placeholders placeholders, boolean useCustomAdapters) {
         Class<?> typeClass = obj.getClass();
         if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
             return null;
         }
 
-        NodeDeserializer nodeDeserializer = obtainAdapter(obj, NodeDeserializer.class);
+        NodeDeserializer nodeDeserializer = useCustomAdapters ? obtainAdapter(obj, NodeDeserializer.class) : null;
         if(nodeDeserializer !=  null) {
             NodeContext<Node<L>, L> context = getContext();
             nodeDeserializer.deserialize(obj, context, placeholders);
