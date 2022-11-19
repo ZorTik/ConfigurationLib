@@ -11,8 +11,8 @@ Advanced configuration library with mapping for Bukkit!<br>
 This library is designed to help you build Bukkit configurations quick and easy. It has bunch of good features that you don't want to miss. You can see some of them through official wiki on this repository.
 
 ## Wiki
-For fast intro, I recommend official wiki section on this repository.
-<a href="https://github.com/ZorTik/ConfigurationLib/wiki">Click to open Wiki</a>
+For fast intro, I recommend official wiki section on this repository. <a href="https://github.com/ZorTik/ConfigurationLib/wiki">Click to open Wiki</a> <br>
+Or you can see my <a href="https://github.com/ZorTik/ConfigurationLib/tree/master/examples">examples.</a>
 
 ## Implementation
 To add this library to your project, you can use one of these methods. I recommend shading the library using shadowJar to avoid version concurrency issues.
