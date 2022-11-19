@@ -1,6 +1,5 @@
-package me.zort.configurationlib.configuration.types;
+package me.zort.configurationlib;
 
-import me.zort.configurationlib.configuration.Node;
 import me.zort.configurationlib.util.Placeholders;
 
 public interface NodeDeserializer<T, L> extends NodeAdapter<T, L> {

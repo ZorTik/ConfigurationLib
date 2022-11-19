@@ -1,7 +1,7 @@
 package me.zort.configurationlib.exception;
 
 import lombok.Getter;
-import me.zort.configurationlib.configuration.Node;
+import me.zort.configurationlib.Node;
 
 public class ConfigurationException extends RuntimeException {
 

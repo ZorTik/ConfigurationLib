@@ -1,6 +1,6 @@
 package me.zort.configurationlib.configuration.bukkit;
 
-import me.zort.configurationlib.configuration.SimpleNode;
+import me.zort.configurationlib.SimpleNode;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class BukkitSimpleNode implements SimpleNode<ConfigurationSection> {

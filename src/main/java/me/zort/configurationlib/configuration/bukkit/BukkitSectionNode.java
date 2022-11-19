@@ -1,9 +1,9 @@
 package me.zort.configurationlib.configuration.bukkit;
 
 import lombok.Getter;
-import me.zort.configurationlib.configuration.Node;
-import me.zort.configurationlib.configuration.NodeTypes;
-import me.zort.configurationlib.configuration.SectionNode;
+import me.zort.configurationlib.Node;
+import me.zort.configurationlib.NodeTypes;
+import me.zort.configurationlib.SectionNode;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
 import me.zort.configurationlib.util.NodeTypeToken;

@@ -2,8 +2,8 @@ package me.zort.configurationlib.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import me.zort.configurationlib.configuration.Node;
-import me.zort.configurationlib.configuration.NodeTypes;
+import me.zort.configurationlib.Node;
+import me.zort.configurationlib.NodeTypes;
 
 @RequiredArgsConstructor
 @Getter

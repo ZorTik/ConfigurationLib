@@ -1,4 +1,4 @@
-package me.zort.configurationlib.configuration;
+package me.zort.configurationlib;
 
 /**
  * Represents a node in configuration. This can be either

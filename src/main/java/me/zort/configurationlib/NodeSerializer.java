@@ -1,4 +1,4 @@
-package me.zort.configurationlib.configuration.types;
+package me.zort.configurationlib;
 
 /**
  * Node serializer class.

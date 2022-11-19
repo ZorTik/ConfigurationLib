@@ -1,12 +1,8 @@
-package me.zort.configurationlib.configuration;
+package me.zort.configurationlib;
 
 import com.google.common.primitives.Primitives;
 import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.annotation.ThisNodeId;
-import me.zort.configurationlib.configuration.types.NodeAdapter;
-import me.zort.configurationlib.configuration.types.NodeContext;
-import me.zort.configurationlib.configuration.types.NodeDeserializer;
-import me.zort.configurationlib.configuration.types.NodeSerializer;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
 import me.zort.configurationlib.util.Validator;

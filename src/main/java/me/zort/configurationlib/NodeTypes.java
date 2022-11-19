@@ -1,4 +1,4 @@
-package me.zort.configurationlib.configuration;
+package me.zort.configurationlib;
 
 import com.google.common.primitives.Primitives;
 import me.zort.configurationlib.util.NodeTypeToken;

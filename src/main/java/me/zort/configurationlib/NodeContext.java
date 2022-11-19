@@ -1,4 +1,4 @@
-package me.zort.configurationlib.configuration.types;
+package me.zort.configurationlib;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;

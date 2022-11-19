@@ -1,4 +1,4 @@
-package me.zort.configurationlib.configuration;
+package me.zort.configurationlib;
 
 import me.zort.configurationlib.exception.ConfigurationException;
 
