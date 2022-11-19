@@ -18,6 +18,9 @@ public class BukkitSimpleNode implements SimpleNode<ConfigurationSection> {
     @Override
     public void set(Object value) {
         this.value = value;
+        // This method should not save now, configuration should be saved
+        // using global save method.
+        // putSelf(parent);
     }
 
     @Override

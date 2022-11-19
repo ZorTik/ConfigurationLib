@@ -2,10 +2,11 @@ package me.zort.configurationlib.configuration.bukkit;
 
 import lombok.Getter;
 import me.zort.configurationlib.configuration.Node;
+import me.zort.configurationlib.configuration.NodeTypes;
 import me.zort.configurationlib.configuration.SectionNode;
-import me.zort.configurationlib.configuration.SimpleNode;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
+import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
@@ -33,10 +34,33 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     private final ConfigurationSection section;
     private final Map<String, Node<ConfigurationSection>> children;
 
-    public BukkitSectionNode(ConfigurationSection section) {
+    public BukkitSectionNode(@Nullable SectionNode<ConfigurationSection> parent, ConfigurationSection section) {
+        super(parent);
         this.section = section;
         this.children = new ConcurrentHashMap<>();
         init();
+    }
+
+    @Override
+    public void clear() {
+        children.clear();
+    }
+
+    @Override
+    public Node<ConfigurationSection> createNode(String key, Object value, NodeTypeToken<?> type) {
+        Node<ConfigurationSection> node;
+        if(type.equals(NodeTypes.SIMPLE)) {
+            node = new BukkitSimpleNode(section, key, value);
+        } else if(type.equals(NodeTypes.SECTION)) {
+            node = new BukkitSectionNode(this, section.createSection(key));
+        } else throw new IllegalArgumentException("Unknown node type: " + type.getTypeClass());
+
+        return node;
+    }
+
+    @Override
+    public void set(String key, Node<ConfigurationSection> node) {
+        children.put(key, node);
     }
 
     @Override
@@ -197,7 +221,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         children.clear();
         for(String key : section.getKeys(false)) {
             children.put(key, section.isConfigurationSection(key)
-                    ? new BukkitSectionNode(section.getConfigurationSection(key))
+                    ? new BukkitSectionNode(this, section.getConfigurationSection(key))
                     : new BukkitSimpleNode(section, key, section.get(key)));
         }
     }

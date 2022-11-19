@@ -11,7 +11,7 @@ public class BukkitFileConfigurationNode extends BukkitSectionNode {
     private final File file;
 
     public BukkitFileConfigurationNode(File file) {
-        super(YamlConfiguration.loadConfiguration(file));
+        super(null, YamlConfiguration.loadConfiguration(file));
         this.file = file;
     }
 
