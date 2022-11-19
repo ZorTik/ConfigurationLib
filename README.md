@@ -2,7 +2,7 @@
 <img src="https://user-images.githubusercontent.com/67344817/202866168-a0b8787f-84c8-49c9-b218-b4a773bba231.png" width="150"></img>
 
 # ConfigurationLib
-⭐ Advanced configuration library with mapping for Bukkit! ⭐<br>
+Advanced configuration library with mapping for Bukkit!<br>
 
 ![Badge](https://img.shields.io/jitpack/version/com.github.ZorTik/ConfigurationLib?style=for-the-badge) ![Badge](https://img.shields.io/github/license/ZorTik/ConfigurationLib?style=for-the-badge)
 </div>
