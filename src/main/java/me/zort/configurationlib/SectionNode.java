@@ -83,6 +83,8 @@ public abstract class SectionNode<L> implements Node<L> {
 
         clear();
 
+        // SectionNode#getContext is not used here because I want
+        // empty context with Object types.
         NodeContext<Object, L> context = new NodeContext<>(this);
         NodeSerializer nodeSerializer = obtainAdapter(from, NodeSerializer.class);
         // Serializer is never null since there is a default one.
@@ -256,6 +258,14 @@ public abstract class SectionNode<L> implements Node<L> {
             NodeAdapter<?, L> nodeAdapter = adapters.get(aClass);
             if(adapterTypeClass.isAssignableFrom(nodeAdapter.getClass()) && aClass.isAssignableFrom(toBeSerialized.getClass())) {
                 return (T) nodeAdapter;
+            }
+        }
+
+        if(parent != null) {
+            // I check if there is any adapter already set in the context.
+            T parentAdapter = parent.obtainAdapter(toBeSerialized, adapterTypeClass);
+            if(parentAdapter != null) {
+                return parentAdapter;
             }
         }
         return adapterTypeClass.equals(NodeSerializer.class)
