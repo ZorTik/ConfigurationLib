@@ -17,34 +17,7 @@ Or you can see my <a href="https://github.com/ZorTik/ConfigurationLib/tree/maste
 ## Implementation
 To add this library to your project, you can use one of these methods. I recommend shading the library using shadowJar to avoid version concurrency issues.
 
-### Gradle:
-```
-repositories {
-	maven { url = 'https://jitpack.io' }
-}
-```
-```
-dependencies {
-	implementation 'com.github.ZorTik:ConfigurationLib:Tag'
-}
-```
-
-### Maven:
-```
-<repositories>
-	<repository>
-		<id>jitpack.io</id>
-		<url>https://jitpack.io</url>
-	</repository>
-</repositories>
-```
-```
-<dependency>
-	<groupId>com.github.ZorTik</groupId>
-		<artifactId>ConfigurationLib</artifactId>
-	<version>Version</version>
-</dependency>
-```
+<a href="https://github.com/ZorTik/ConfigurationLib/wiki/Implementation">Implementation on Wiki</a>
 
 
 ## Attributions
