@@ -14,6 +14,6 @@ public interface NodeSerializer<T, L> extends NodeAdapter<T, L> {
      * @param context The context to serialize to.
      * @param object The object to serialize.
      */
-    void serialize(NodeContext<Object> context, T object);
+    void serialize(NodeContext<Object, L> context, T object);
 
 }

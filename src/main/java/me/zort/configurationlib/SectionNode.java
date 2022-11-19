@@ -83,7 +83,7 @@ public abstract class SectionNode<L> implements Node<L> {
 
         clear();
 
-        NodeContext<Object> context = new NodeContext<>();
+        NodeContext<Object, L> context = new NodeContext<>(this);
         NodeSerializer nodeSerializer = obtainAdapter(from, NodeSerializer.class);
         // Serializer is never null since there is a default one.
         assert nodeSerializer != null;
@@ -140,7 +140,7 @@ public abstract class SectionNode<L> implements Node<L> {
 
         NodeDeserializer nodeDeserializer = obtainAdapter(obj, NodeDeserializer.class);
         if(nodeDeserializer !=  null) {
-            NodeContext<Node<L>> context = getContext();
+            NodeContext<Node<L>, L> context = getContext();
             nodeDeserializer.deserialize(obj, context, placeholders);
             return obj;
         }
@@ -234,8 +234,8 @@ public abstract class SectionNode<L> implements Node<L> {
                 .collect(Collectors.toList());
     }
 
-    public NodeContext<Node<L>> getContext() {
-        NodeContext<Node<L>> context = new NodeContext<>();
+    public NodeContext<Node<L>, L> getContext() {
+        NodeContext<Node<L>, L> context = new NodeContext<>(this);
         getNodes().forEach(node -> context.set(node.getName(), node));
         return context;
     }

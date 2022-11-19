@@ -14,10 +14,12 @@ import java.util.Map;
  * @author ZorTik
  */
 @RequiredArgsConstructor
-public class NodeContext<T> {
+@Getter
+public class NodeContext<T, L> {
 
     @Getter
     private final Map<String, T> objects = Maps.newConcurrentMap();
+    private final SectionNode<L> node;
 
     public void set(String key, T object) {
         objects.put(key, object);
