@@ -1,7 +1,7 @@
 package me.zort.configurationlib;
 
 import me.zort.configurationlib.util.Placeholders;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Node deserializer class.
@@ -16,11 +16,11 @@ public interface NodeDeserializer<T, L> extends NodeAdapter<T, L> {
      * Return value of this function should return deserializeInto
      * object, but it's optional to make a new one.
      *
-     * @param deserializeInto The object to deserialize into, or null if internal instance creation failed.
+     * @param deserializeInto The object to deserialize into.
      * @param context The context to deserialize from.
      * @param placeholders The placeholders to use.
      * @return The deserialized object.
      */
-    T deserialize(@Nullable T deserializeInto, NodeContext<Node<L>, L> context, Placeholders placeholders);
+    T deserialize(@NotNull T deserializeInto, NodeContext<Node<L>, L> context, Placeholders placeholders);
 
 }
