@@ -9,10 +9,7 @@ import me.zort.configurationlib.util.Validator;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -115,7 +112,9 @@ public abstract class SectionNode<L> implements Node<L> {
                 // sections are not leaf nodes.
                 return null;
             }
-            return map(typeClass.getDeclaredConstructor().newInstance(), placeholders);
+            Constructor<T> declaredConstructor = typeClass.getDeclaredConstructor();
+            declaredConstructor.setAccessible(true);
+            return map(declaredConstructor.newInstance(), placeholders);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -280,6 +279,10 @@ public abstract class SectionNode<L> implements Node<L> {
         return adapterTypeClass.equals(NodeSerializer.class)
                 ? (T) new DefaultNodeSerializer()
                 : null;
+    }
+
+    private void debug(String message) {
+        // TODO
     }
 
     public static class DefaultNodeSerializer<L> implements NodeSerializer<Object, L> {
