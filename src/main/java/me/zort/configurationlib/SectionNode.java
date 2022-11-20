@@ -1,5 +1,6 @@
 package me.zort.configurationlib;
 
+import com.google.common.base.Defaults;
 import com.google.common.primitives.Primitives;
 import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.annotation.ThisNodeId;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -155,34 +157,30 @@ public abstract class SectionNode<L> implements Node<L> {
             return (T) deserialized;
         }
 
-        for(Node<L> node : getNodes()) {
-            try {
-                Field field = typeClass.getDeclaredField(node.getName());
-                if(Modifier.isTransient(field.getModifiers())) {
-                    // Transient fields are skipped.
-                    continue;
-                }
-                field.setAccessible(true);
-                Object value = buildValue(field, node, placeholders);
-                if(value != null) {
-                    // Null values are skipped.
-                    try {
-                        field.set(obj, value);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (NoSuchFieldException ignored) {}
-        }
+        Map<String, Node<L>> nodeCandidates = getNodes()
+                .stream()
+                .collect(Collectors.toMap(Node::getName, Function.identity()));
         for(Field field : typeClass.getDeclaredFields()) {
-            // See: me.zort.configurationlib.annotation.ThisNodeId
+            if(Modifier.isTransient(field.getModifiers())) {
+                // Transient fields are skipped.
+                continue;
+            }
+            field.setAccessible(true);
+            Object value = Defaults.defaultValue(field.getType());
             if(String.class.equals(field.getType()) && field.isAnnotationPresent(ThisNodeId.class)) {
-                field.setAccessible(true);
-                try {
-                    field.set(obj, getName());
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                value = getName();
+            } else if(nodeCandidates.containsKey(field.getName())) {
+                Object builtValue = buildValue(field, nodeCandidates.get(field.getName()), placeholders);
+                if(builtValue != null) {
+                    value = builtValue;
                 }
+            }
+            try {
+                if(field.get(obj) == null) {
+                    field.set(obj, value);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
         return obj;
