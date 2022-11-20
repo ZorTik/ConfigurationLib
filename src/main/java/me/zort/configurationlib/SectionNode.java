@@ -2,21 +2,24 @@ package me.zort.configurationlib;
 
 import com.google.common.base.Defaults;
 import com.google.common.primitives.Primitives;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.annotation.ThisNodeId;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
 import me.zort.configurationlib.util.Validator;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -30,9 +33,21 @@ public abstract class SectionNode<L> implements Node<L> {
     private final Map<Class<?>, NodeAdapter<?, L>> adapters = new ConcurrentHashMap<>();
     @Nullable
     private final SectionNode<L> parent;
+    private LogAdapter logAdapter;
+    @Setter
+    @Getter
+    private boolean debug;
 
     public SectionNode(@Nullable SectionNode<L> parent) {
+        this(parent, LogAdapter.DEFAULT);
+    }
+
+    public SectionNode(@Nullable SectionNode<L> parent, LogAdapter logAdapter) {
         this.parent = parent;
+        this.logAdapter = logAdapter;
+        this.debug = false;
+
+        registerAdapter(Collection.class, new DefaultCollectionSerializer<>(this));
     }
 
     @ApiStatus.Internal
@@ -43,6 +58,11 @@ public abstract class SectionNode<L> implements Node<L> {
 
     public void clear() {
         getNodes().clear();
+    }
+
+    public void setLogAdapter(@NotNull LogAdapter logAdapter) {
+        Objects.requireNonNull(logAdapter);
+        this.logAdapter = logAdapter;
     }
 
     /**
@@ -77,7 +97,7 @@ public abstract class SectionNode<L> implements Node<L> {
     public void set(Object from) {
         if(isPrimitive(from.getClass())) {
             // Primitive values can't be passed to sections!
-            return;
+            throw new RuntimeException("Cannot set primitive value to section!");
         }
 
         clear();
@@ -280,7 +300,26 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     private void debug(String message) {
-        // TODO
+        if (makeContextCheck(SectionNode::isDebug)) {
+            getContextLogAdapter().log(Level.INFO, message);
+        }
+    }
+
+    private LogAdapter getContextLogAdapter() {
+        LogAdapter adapter = logAdapter;
+        if(adapter == LogAdapter.DEFAULT && parent != null) {
+            LogAdapter contextLogAdapter = parent.getContextLogAdapter();
+            if(contextLogAdapter != LogAdapter.DEFAULT) {
+                adapter = contextLogAdapter;
+            }
+        }
+        return adapter;
+    }
+
+    private boolean makeContextCheck(Predicate<SectionNode<L>> test) {
+        if(test.test(this))
+            return true;
+        return parent != null && test.test(parent);
     }
 
     public static class DefaultNodeSerializer<L> implements NodeSerializer<Object, L> {
@@ -314,6 +353,24 @@ public abstract class SectionNode<L> implements Node<L> {
             }
         }
 
+    }
+
+    @RequiredArgsConstructor
+    public static class DefaultCollectionSerializer<L> implements NodeSerializer<Collection, L> {
+
+        private final SectionNode<L> holder;
+
+        @Override
+        public void serialize(NodeContext<Object, L> context, Collection object) {
+            for (Object obj : object) {
+                String nodeId = ThisNodeId.Parser.parse(obj);
+                if(nodeId == null) {
+                    holder.debug("Node ID is null for object " + obj + " in collection of type " + object.getClass());
+                    continue;
+                }
+                context.set(nodeId, obj);
+            }
+        }
     }
 
 }
