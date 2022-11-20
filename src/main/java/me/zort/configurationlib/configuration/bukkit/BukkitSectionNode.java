@@ -41,7 +41,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         this.children = new ConcurrentHashMap<>();
         init();
 
-        registerAdapter(ItemStack.class, new ItemStackAdapter());
+        //registerAdapter(ItemStack.class, new ItemStackAdapter());
     }
 
     @Override
