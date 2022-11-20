@@ -147,8 +147,13 @@ public abstract class SectionNode<L> implements Node<L> {
         NodeDeserializer nodeDeserializer = useCustomAdapters ? obtainAdapter(obj, NodeDeserializer.class) : null;
         if(nodeDeserializer !=  null) {
             NodeContext<Node<L>, L> context = getContext();
-            nodeDeserializer.deserialize(obj, context, placeholders);
-            return obj;
+            Object deserialized = nodeDeserializer.deserialize(obj, context, placeholders);
+            if(!obj.getClass().isAssignableFrom(deserialized.getClass())) {
+                throw new RuntimeException(String.format("Deserialized object is not assignable to the provided type! (%s -> %s)",
+                        obj.getClass().getName(),
+                        deserialized.getClass().getName()));
+            }
+            return (T) deserialized;
         }
 
         for(Node<L> node : getNodes()) {

@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.zort.configurationlib.Node;
 import me.zort.configurationlib.NodeTypes;
 import me.zort.configurationlib.SectionNode;
+import me.zort.configurationlib.configuration.bukkit.adapter.ItemStackAdapter;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
 import me.zort.configurationlib.util.NodeTypeToken;
@@ -39,6 +40,8 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         this.section = section;
         this.children = new ConcurrentHashMap<>();
         init();
+
+        registerAdapter(ItemStack.class, new ItemStackAdapter());
     }
 
     @Override
