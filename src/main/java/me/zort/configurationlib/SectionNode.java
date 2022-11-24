@@ -23,6 +23,8 @@ import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 /**
  * Represents a section node in configuration.
  *
@@ -124,14 +126,19 @@ public abstract class SectionNode<L> implements Node<L> {
 
         if(value == null) {
             if(split.length > 1) {
-                set(String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), null);
+                ofNullable(get(split[1]))
+                                .ifPresent(node -> {
+                                    if(node instanceof SectionNode) {
+                                        ((SectionNode<L>) node).set(String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), null);
+                                    }
+                                });
                 return;
             }
             deleteNode(key);
             return;
         } else if(key.contains(".")) {
             // This is not our target.
-            String sub = split[1];
+            String sub = split[0];
             Node<L> node = get(sub);
             if(node instanceof SimpleNode) {
                 set(sub, null);
@@ -148,7 +155,7 @@ public abstract class SectionNode<L> implements Node<L> {
         Node<L> lNode = get(key);
         if(lNode == null) {
             lNode = createNode(key, value, NodeTypes.recognize(value));
-            set(key, lNode);
+            set(key, (Node) lNode);
         }
         lNode.set(value);
     }
@@ -357,7 +364,7 @@ public abstract class SectionNode<L> implements Node<L> {
         @Override
         public void serialize(NodeContext context, Object from) {
             for(Field field : from.getClass().getDeclaredFields()) {
-                if(Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
+                if(Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) || field.isAnnotationPresent(ThisNodeId.class)) {
                     continue;
                 }
                 field.setAccessible(true);
