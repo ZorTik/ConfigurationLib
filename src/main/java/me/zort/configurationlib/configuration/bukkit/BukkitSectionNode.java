@@ -78,6 +78,8 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
             ConfigurationSection locationToPutIn = location;
             if(node instanceof SectionNode && !location.contains(node.getName())) {
                 locationToPutIn = location.createSection(node.getName());
+            } else if(node instanceof SectionNode && location.contains(node.getName())) {
+                locationToPutIn = location.getConfigurationSection(node.getName());
             }
             node.putSelf(locationToPutIn);
         }
