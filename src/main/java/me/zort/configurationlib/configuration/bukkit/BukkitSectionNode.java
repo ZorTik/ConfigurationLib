@@ -62,6 +62,12 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     @Override
+    public void deleteNode(String key) {
+        section.set(key, null);
+        children.remove(key);
+    }
+
+    @Override
     public void set(String key, Node<ConfigurationSection> node) {
         children.put(key, node);
     }

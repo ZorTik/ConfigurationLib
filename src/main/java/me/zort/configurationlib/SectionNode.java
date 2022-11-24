@@ -10,6 +10,7 @@ import me.zort.configurationlib.annotation.ThisNodeId;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
 import me.zort.configurationlib.util.Validator;
+import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,6 +53,8 @@ public abstract class SectionNode<L> implements Node<L> {
 
     @ApiStatus.Internal
     public abstract Node<L> createNode(String key, Object value, NodeTypeToken<?> type);
+    // Key is always definitive.
+    public abstract void deleteNode(String key);
     public abstract void set(String key, Node<L> node);
     public abstract Node<L> get(String path);
     public abstract Collection<Node<L>> getNodes();
@@ -115,6 +118,33 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     public void set(String key, Object value) {
+        Objects.requireNonNull(key, "Path must not be null!");
+
+        String[] split = key.split("\\.");
+
+        if(value == null) {
+            if(split.length > 1) {
+                set(String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), null);
+                return;
+            }
+            deleteNode(key);
+            return;
+        } else if(key.contains(".")) {
+            // This is not our target.
+            String sub = split[1];
+            Node<L> node = get(sub);
+            if(node instanceof SimpleNode) {
+                set(sub, null);
+            }
+            if(node == null) {
+                node = createNode(sub, null, NodeTypes.SECTION);
+                set(sub, node);
+            }
+            ((SectionNode<L>) node).set(
+                    String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), value);
+            return;
+        }
+
         Node<L> lNode = get(key);
         if(lNode == null) {
             lNode = createNode(key, value, NodeTypes.recognize(value));
