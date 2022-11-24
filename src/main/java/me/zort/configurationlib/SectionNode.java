@@ -92,6 +92,15 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     /**
+     * This method unregisters an already registered adapter.
+     *
+     * @param type The (super)class of the serialized/deserialized object.
+     */
+    public void unregisterAdapter(Class<?> type) {
+        adapters.remove(type);
+    }
+
+    /**
      * Updates this node's values from the provided mapped
      * object.
      * This method does not create new nodes, only updates
