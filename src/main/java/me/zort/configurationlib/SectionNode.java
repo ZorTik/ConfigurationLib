@@ -138,7 +138,7 @@ public abstract class SectionNode<L> implements Node<L> {
             return;
         } else if(key.contains(".")) {
             // This is not our target.
-            String sub = split[1];
+            String sub = split[0];
             Node<L> node = get(sub);
             if(node instanceof SimpleNode) {
                 set(sub, null);
