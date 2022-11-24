@@ -75,7 +75,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public void putSelf(ConfigurationSection location) {
         for(Node<ConfigurationSection> node : children.values()) {
-            node.putSelf(location);
+            ConfigurationSection locationToPutIn = location;
+            if(node instanceof SectionNode && !location.contains(node.getName())) {
+                locationToPutIn = location.createSection(node.getName());
+            }
+            node.putSelf(locationToPutIn);
         }
     }
 
