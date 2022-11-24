@@ -1,9 +1,8 @@
 package me.zort.configurationlib.configuration.bukkit;
 
 import lombok.Getter;
-import me.zort.configurationlib.Node;
-import me.zort.configurationlib.NodeTypes;
-import me.zort.configurationlib.SectionNode;
+import lombok.RequiredArgsConstructor;
+import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.adapter.ItemStackAdapter;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -41,7 +41,9 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         this.children = new ConcurrentHashMap<>();
         init();
 
-        //registerAdapter(ItemStack.class, new ItemStackAdapter());
+        if(parent == null) {
+            registerAdapter(ItemStack.class, new ItemStackAdapter());
+        }
     }
 
     @Override
@@ -91,9 +93,9 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Object buildValue(Field field, Node<ConfigurationSection> node, Placeholders placeholders) {
         // I'm specifying new field types for mapped objects.
-        if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {
+        /*if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {     // Replaced by DefaultItemDeserializer
             return ((BukkitSectionNode) node).getAsItem(placeholders);
-        } else if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
+        } else */if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
             Object listCandidate = ((BukkitSimpleNode) node).get();
             if(listCandidate instanceof List) {
                 return listCandidate;
@@ -244,6 +246,15 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     private static int verMajor() {
         String verString = String.join("", (String[]) ArrayUtils.subarray(Bukkit.getServer().getBukkitVersion().split("-")[0].split("\\."), 0, 2));
         return Integer.parseInt(verString);
+    }
+
+    private static class DefaultItemDeserializer implements NodeDeserializer<ItemStack, ConfigurationSection> {
+
+        @Override
+        public ItemStack deserialize(@NotNull ItemStack deserializeInto, NodeContext<Node<ConfigurationSection>, ConfigurationSection> context, Placeholders placeholders) {
+            return ((BukkitSectionNode) context.getNode()).getAsItem(placeholders);
+        }
+
     }
 
 }
