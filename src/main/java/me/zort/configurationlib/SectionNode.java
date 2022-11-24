@@ -1,6 +1,7 @@
 package me.zort.configurationlib;
 
 import com.google.common.base.Defaults;
+import com.google.common.base.Strings;
 import com.google.common.primitives.Primitives;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,15 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     /**
+     * This method unregisters an already registered adapter.
+     *
+     * @param type The (super)class of the serialized/deserialized object.
+     */
+    public void unregisterAdapter(Class<?> type) {
+        adapters.remove(type);
+    }
+
+    /**
      * Updates this node's values from the provided mapped
      * object.
      * This method does not create new nodes, only updates
@@ -120,18 +130,31 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     public void set(String key, Object value) {
+        if(isContextDebug() && isHighestLevel()) {
+            doLog("Highest level inspection:");
+            doLog("Before update:");
+            doLog("------------------------");
+            printStructure();
+        }
+        doSet(key, value);
+        if(isContextDebug() && isHighestLevel()) {
+            doLog("------------------------");
+            printStructure();
+        }
+    }
+
+    private void doSet(String key, Object value) {
         Objects.requireNonNull(key, "Path must not be null!");
 
         String[] split = key.split("\\.");
-
         if(value == null) {
             if(split.length > 1) {
                 ofNullable(get(split[1]))
-                                .ifPresent(node -> {
-                                    if(node instanceof SectionNode) {
-                                        ((SectionNode<L>) node).set(String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), null);
-                                    }
-                                });
+                        .ifPresent(node -> {
+                            if(node instanceof SectionNode) {
+                                ((SectionNode<L>) node).set(String.join(".", (String[]) ArrayUtils.subarray(split, 1, split.length)), null);
+                            }
+                        });
                 return;
             }
             deleteNode(key);
@@ -305,6 +328,33 @@ public abstract class SectionNode<L> implements Node<L> {
         return context;
     }
 
+    public void printStructure() {
+        if(parent != null) {
+            parent.printStructure();
+            return;
+        }
+        printStructureInternal(0);
+    }
+
+    private void printStructureInternal(int level) {
+        String prefix = Strings.repeat("-", level);
+        if(parent != null) {
+            doLog(String.format("%s %s:", prefix, getName()));
+        }
+        for (Node<L> node : getNodes()) {
+            if(node instanceof SectionNode) {
+                ((SectionNode<L>) node).printStructureInternal(level + 1);
+            } else if(node instanceof SimpleNode) {
+                doLog(String.format("%s %s: %s", prefix + "-", node.getName(), ((SimpleNode<L>) node).get()));
+            }
+        }
+    }
+
+    private void doLog(String text) {
+        LogAdapter logAdapter = getContextLogAdapter();
+        logAdapter.log(Level.INFO, text);
+    }
+
     // This includes also String, so it is not really primitive,
     // but I named it like that, so I don't want to change it. :D
     private boolean isPrimitive(Class<?> clazz) {
@@ -336,8 +386,16 @@ public abstract class SectionNode<L> implements Node<L> {
                 : null;
     }
 
+    public boolean isContextDebug() {
+        return makeContextCheck(SectionNode::isDebug);
+    }
+
+    public boolean isHighestLevel() {
+        return parent == null;
+    }
+
     private void debug(String message) {
-        if (makeContextCheck(SectionNode::isDebug)) {
+        if (isContextDebug()) {
             getContextLogAdapter().log(Level.INFO, message);
         }
     }
