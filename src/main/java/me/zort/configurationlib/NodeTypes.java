@@ -9,7 +9,8 @@ public final class NodeTypes {
     public static final NodeTypeToken<SimpleNode> SIMPLE = new NodeTypeToken<>(SimpleNode.class, Type.SIMPLE);
 
     public static NodeTypeToken<?> recognize(Object object) {
-        return Primitives.isWrapperType(Primitives.wrap(object.getClass())) ? SIMPLE : SECTION;
+        Class<?> aClass = object.getClass();
+        return Primitives.isWrapperType(Primitives.wrap(aClass)) || aClass.equals(String.class) ? SIMPLE : SECTION;
     }
 
     public enum Type {
