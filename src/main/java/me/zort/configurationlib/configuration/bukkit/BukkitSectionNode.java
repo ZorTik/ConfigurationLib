@@ -1,9 +1,8 @@
 package me.zort.configurationlib.configuration.bukkit;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import me.zort.configurationlib.*;
-import me.zort.configurationlib.configuration.bukkit.adapter.ItemStackAdapter;
+import me.zort.configurationlib.configuration.bukkit.adapter.DefaultItemAdapter;
 import me.zort.configurationlib.util.Colorizer;
 import me.zort.configurationlib.util.ItemValidator;
 import me.zort.configurationlib.util.NodeTypeToken;
@@ -11,14 +10,12 @@ import me.zort.configurationlib.util.Placeholders;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -42,7 +39,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         init();
 
         if(parent == null) {
-            registerAdapter(ItemStack.class, new ItemStackAdapter());
+            registerAdapter(ItemStack.class, new DefaultItemAdapter());
         }
     }
 
@@ -181,7 +178,8 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
             }
             if(section.contains("enchantments")) {
                 for(String key : section.getConfigurationSection("enchantments").getKeys(false)) {
-                    Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key.toLowerCase()));
+                    //Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key.toLowerCase()));
+                    Enchantment enchantment = Enchantment.getByName(key.toUpperCase());
                     if(enchantment == null) {
                         continue;
                     }
@@ -246,15 +244,6 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     private static int verMajor() {
         String verString = String.join("", (String[]) ArrayUtils.subarray(Bukkit.getServer().getBukkitVersion().split("-")[0].split("\\."), 0, 2));
         return Integer.parseInt(verString);
-    }
-
-    private static class DefaultItemDeserializer implements NodeDeserializer<ItemStack, ConfigurationSection> {
-
-        @Override
-        public ItemStack deserialize(@NotNull ItemStack deserializeInto, NodeContext<Node<ConfigurationSection>, ConfigurationSection> context, Placeholders placeholders) {
-            return ((BukkitSectionNode) context.getNode()).getAsItem(placeholders);
-        }
-
     }
 
 }
