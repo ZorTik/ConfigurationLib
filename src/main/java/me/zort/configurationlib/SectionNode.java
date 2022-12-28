@@ -424,7 +424,7 @@ public abstract class SectionNode<L> implements Node<L> {
     private boolean makeContextCheck(Predicate<SectionNode<L>> test) {
         if(test.test(this))
             return true;
-        return parent != null && test.test(parent);
+        return parent != null && parent.makeContextCheck(test);
     }
 
     public static class DefaultNodeSerializer<L> implements NodeSerializer<Object, L> {
