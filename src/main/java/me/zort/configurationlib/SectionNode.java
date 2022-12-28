@@ -222,11 +222,12 @@ public abstract class SectionNode<L> implements Node<L> {
     public <T> T map(T obj, Placeholders placeholders, boolean useCustomAdapters) {
         Class<?> typeClass = obj.getClass();
         if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
+            debug(String.format("Cannot map section to primitive type for %s", typeClass.getName()));
             return null;
         }
 
         NodeDeserializer nodeDeserializer = useCustomAdapters ? obtainAdapter(obj, NodeDeserializer.class) : null;
-        if(nodeDeserializer !=  null) {
+        if(nodeDeserializer != null) {
             NodeContext<Node<L>, L> context = getContext();
             Object deserialized = nodeDeserializer.deserialize(obj, context, placeholders);
             if(!obj.getClass().isAssignableFrom(deserialized.getClass())) {
@@ -234,6 +235,7 @@ public abstract class SectionNode<L> implements Node<L> {
                         obj.getClass().getName(),
                         deserialized.getClass().getName()));
             }
+            debug(String.format("Deserialized object %s using adapter %s", deserialized, nodeDeserializer.getClass().getName()));
             return (T) deserialized;
         }
 
@@ -243,13 +245,16 @@ public abstract class SectionNode<L> implements Node<L> {
         for(Field field : typeClass.getDeclaredFields()) {
             if(Modifier.isTransient(field.getModifiers())) {
                 // Transient fields are skipped.
+                debug(String.format("Skipping transient field %s", field.getName()));
                 continue;
             }
             field.setAccessible(true);
             Object value = Defaults.defaultValue(field.getType());
             if(String.class.equals(field.getType()) && field.isAnnotationPresent(ThisNodeId.class)) {
                 value = getName();
+                debug(String.format("Field %s is mapped to this node id %s", field.getName(), value));
             } else if(nodeCandidates.containsKey(field.getName())) {
+                debug("Found node for field " + field.getName());
                 Object builtValue = buildValue(field, nodeCandidates.get(field.getName()), placeholders);
                 if(builtValue != null) {
                     value = builtValue;
@@ -286,8 +291,11 @@ public abstract class SectionNode<L> implements Node<L> {
     public Object buildValue(Field field, Node<L> node, Placeholders placeholders) {
         Object value = null;
 
+        debug("Building value for field " + field.getName());
+
         if(node instanceof SimpleNode && isPrimitive(field.getType())) {
             value = ((SimpleNode<L>) node).get();
+            debug(String.format("Field %s is mapped to simple node %s", field.getName(), value));
         } else if(node instanceof SectionNode) {
             Class<?> contentType;
             if(List.class.isAssignableFrom(field.getType())
@@ -297,9 +305,11 @@ public abstract class SectionNode<L> implements Node<L> {
                         .forEach(sn -> {
                             list.add(sn.map(contentType));
                         });
+                debug(String.format("Field %s is mapped to list of sections %s", field.getName(), list));
                 return list;
             } else {
                 value = ((SectionNode<L>) node).map(field.getType());
+                debug(String.format("Field %s is mapped to section node %s", field.getName(), value));
             }
         }
         return value;
@@ -365,7 +375,7 @@ public abstract class SectionNode<L> implements Node<L> {
     private <T extends NodeAdapter> T obtainAdapter(Object toBeSerialized, Class<T> adapterTypeClass) {
         Validator.requireAnyType(adapterTypeClass, NodeSerializer.class, NodeDeserializer.class);
 
-        // I allow users tto define their own serializers.
+        // I allow users to define their own serializers.
         // @see NodeSerializer
         for (Class<?> aClass : adapters.keySet()) {
             NodeAdapter<?, L> nodeAdapter = adapters.get(aClass);

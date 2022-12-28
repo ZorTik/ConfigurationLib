@@ -90,9 +90,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Object buildValue(Field field, Node<ConfigurationSection> node, Placeholders placeholders) {
         // I'm specifying new field types for mapped objects.
-        /*if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {     // Replaced by DefaultItemDeserializer
-            return ((BukkitSectionNode) node).getAsItem(placeholders);
-        } else */if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
+        if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
             Object listCandidate = ((BukkitSimpleNode) node).get();
             if(listCandidate instanceof List) {
                 return listCandidate;
