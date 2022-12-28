@@ -230,6 +230,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         return children.values();
     }
 
+    public void setDebug(boolean debug, boolean reload) {
+        super.setDebug(debug);
+        if(reload) init();
+    }
+
     private void init() {
         children.clear();
         for(String key : section.getKeys(false)) {
