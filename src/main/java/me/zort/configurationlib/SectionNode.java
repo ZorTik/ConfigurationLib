@@ -56,7 +56,7 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     @ApiStatus.Internal
-    public abstract Node<L> createNode(String key, Object value, NodeTypeToken<?> type);
+    public abstract Node<L> createNode(String key, @Nullable Object value, NodeTypeToken<?> type);
     // Key is always definitive.
     public abstract void deleteNode(String key);
     public abstract void set(String key, Node<L> node);
@@ -448,10 +448,6 @@ public abstract class SectionNode<L> implements Node<L> {
                     } else {
                         name = field.getName();
                     }
-                /*getNodes().stream()
-                        .filter(n -> n.getName().equals(name))
-                        .findFirst()
-                        .ifPresent(node -> node.set(value));*/
                     context.set(name, value);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();

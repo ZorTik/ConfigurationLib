@@ -46,9 +46,9 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     @Override
-    public Node<ConfigurationSection> createNode(String key, Object value, NodeTypeToken<?> type) {
+    public Node<ConfigurationSection> createNode(String key, @Nullable Object value, NodeTypeToken<?> type) {
         Node<ConfigurationSection> node;
-        if(type.equals(NodeTypes.SIMPLE) || (value != null && Validator.isPrimitiveList(value.getClass()))) {
+        if(type.equals(NodeTypes.SIMPLE)) {
             node = new BukkitSimpleNode(section, key, value);
         } else if(type.equals(NodeTypes.SECTION)) {
             node = new BukkitSectionNode(this, section.createSection(key));
@@ -68,6 +68,16 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
             return false;
         }
         return ((BukkitSectionNode) getParent()).save();
+    }
+
+    @Override
+    public void set(String key, Object value) {
+        if(value.getClass().equals(String[].class)) {
+            // String arrays are passed as simple nodes.
+            set(key, createNode(key, value, NodeTypes.SIMPLE));
+            return;
+        }
+        super.set(key, value);
     }
 
     @Override
@@ -98,6 +108,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
             Object listCandidate = ((BukkitSimpleNode) node).get();
             if(listCandidate instanceof List) {
                 return listCandidate;
+            }
+        } else if(field.getType().equals(String[].class) && node instanceof BukkitSimpleNode) {
+            Object arrayCandidate = ((BukkitSimpleNode) node).get();
+            if(arrayCandidate instanceof String[]) {
+                return arrayCandidate;
             }
         }
         // TODO: Add support for other types.
