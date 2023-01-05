@@ -48,7 +48,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Node<ConfigurationSection> createNode(String key, Object value, NodeTypeToken<?> type) {
         Node<ConfigurationSection> node;
-        if(type.equals(NodeTypes.SIMPLE) || Validator.isPrimitiveList(value.getClass())) {
+        if(type.equals(NodeTypes.SIMPLE) || (value != null && Validator.isPrimitiveList(value.getClass()))) {
             node = new BukkitSimpleNode(section, key, value);
         } else if(type.equals(NodeTypes.SECTION)) {
             node = new BukkitSectionNode(this, section.createSection(key));
