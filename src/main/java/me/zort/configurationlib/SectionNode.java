@@ -35,7 +35,8 @@ import static java.util.Optional.ofNullable;
 public abstract class SectionNode<L> implements Node<L> {
 
     private final Map<Class<?>, NodeAdapter<?, L>> adapters = new ConcurrentHashMap<>();
-    @Nullable
+
+    @Getter(onMethod_ = {@Nullable})
     private final SectionNode<L> parent;
     private LogAdapter logAdapter;
     @Setter

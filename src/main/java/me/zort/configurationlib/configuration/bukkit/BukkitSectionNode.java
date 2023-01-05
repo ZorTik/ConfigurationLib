@@ -66,6 +66,13 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         children.remove(key);
     }
 
+    public boolean save() {
+        if(getParent() == null || !(getParent() instanceof BukkitSectionNode)) {
+            return false;
+        }
+        return ((BukkitSectionNode) getParent()).save();
+    }
+
     @Override
     public void set(String key, Node<ConfigurationSection> node) {
         children.put(key, node);
