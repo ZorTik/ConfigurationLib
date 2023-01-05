@@ -3,10 +3,7 @@ package me.zort.configurationlib.configuration.bukkit;
 import lombok.Getter;
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.adapter.DefaultItemAdapter;
-import me.zort.configurationlib.util.Colorizer;
-import me.zort.configurationlib.util.ItemValidator;
-import me.zort.configurationlib.util.NodeTypeToken;
-import me.zort.configurationlib.util.Placeholders;
+import me.zort.configurationlib.util.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -51,7 +48,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Node<ConfigurationSection> createNode(String key, Object value, NodeTypeToken<?> type) {
         Node<ConfigurationSection> node;
-        if(type.equals(NodeTypes.SIMPLE)) {
+        if(type.equals(NodeTypes.SIMPLE) || Validator.isPrimitiveList(value.getClass())) {
             node = new BukkitSimpleNode(section, key, value);
         } else if(type.equals(NodeTypes.SECTION)) {
             node = new BukkitSectionNode(this, section.createSection(key));
