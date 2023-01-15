@@ -147,10 +147,6 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         return current;
     }
 
-    public boolean has(String path) {
-        return get(path) != null;
-    }
-
     @Nullable
     public ItemStack getAsItem() {
         return getAsItem(new Placeholders());

@@ -333,6 +333,10 @@ public abstract class SectionNode<L> implements Node<L> {
                 .collect(Collectors.toList());
     }
 
+    public boolean has(String path) {
+        return get(path) != null;
+    }
+
     public NodeContext<Node<L>, L> getContext() {
         NodeContext<Node<L>, L> context = new NodeContext<>(this);
         getNodes().forEach(node -> context.set(node.getName(), node));
