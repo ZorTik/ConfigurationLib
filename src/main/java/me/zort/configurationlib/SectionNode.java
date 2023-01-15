@@ -60,7 +60,6 @@ public abstract class SectionNode<L> implements Node<L> {
     // Key is always definitive.
     public abstract void deleteNode(String key);
     public abstract void set(String key, Node<L> node);
-    public abstract Node<L> get(String path);
     public abstract Collection<Node<L>> getNodes();
 
     public void clear() {
@@ -314,6 +313,27 @@ public abstract class SectionNode<L> implements Node<L> {
             }
         }
         return value;
+    }
+
+    @Nullable
+    public Node<L> get(String path) {
+        Map<String, Node<L>> children = new HashMap<>();
+
+        for (Node<L> node : getNodes()) {
+            children.put(node.getName(), node);
+        }
+
+        Node<L> current = this;
+        for(String key : path.split("\\.")) {
+            if(!(current instanceof SectionNode)) {
+                // Path points nowhere.
+                return null;
+            }
+            current = current == this
+                    ? children.get(key)
+                    : ((SectionNode<L>) current).get(key);
+        }
+        return current;
     }
 
     public SimpleNode<L> getSimple(String path) {
