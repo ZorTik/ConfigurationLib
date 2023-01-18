@@ -73,18 +73,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         return ((BukkitSectionNode) getParent()).save();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void set(String key, Object value) {
-        if(value.getClass().equals(String[].class) || isStringList(value.getClass())) {
-
+        if(value.getClass().equals(String[].class)) {
             // String arrays are passed as simple nodes.
-            if(!(value instanceof List)) {
-                assert value instanceof String[];
-                value = Lists.newArrayList((String[]) value);
-            }
-
-            set(key, createNode(key, value, NodeTypes.SIMPLE));
+            set(key, createNode(key, Lists.newArrayList((String[]) value), NodeTypes.SIMPLE));
             return;
         }
         super.set(key, value);
