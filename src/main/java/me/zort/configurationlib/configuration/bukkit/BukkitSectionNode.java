@@ -1,5 +1,6 @@
 package me.zort.configurationlib.configuration.bukkit;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.adapter.DefaultItemAdapter;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static me.zort.configurationlib.util.Validator.isStringList;
 
 public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
 
@@ -70,10 +73,17 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         return ((BukkitSectionNode) getParent()).save();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void set(String key, Object value) {
-        if(value.getClass().equals(String[].class)) {
+        if(value.getClass().equals(String[].class) || isStringList(value.getClass())) {
+
             // String arrays are passed as simple nodes.
+            if(!(value instanceof List)) {
+                assert value instanceof String[];
+                value = Lists.newArrayList((String[]) value);
+            }
+
             set(key, createNode(key, value, NodeTypes.SIMPLE));
             return;
         }

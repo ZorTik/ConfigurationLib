@@ -26,6 +26,10 @@ public final class Validator {
         return List.class.isAssignableFrom(toBeChecked) && toBeChecked.getTypeParameters().length == 1 && isPrimitive(toBeChecked.getTypeParameters()[0].getGenericDeclaration());
     }
 
+    public static boolean isStringList(Class<?> toBeChecked) {
+        return List.class.isAssignableFrom(toBeChecked) && toBeChecked.getTypeParameters().length == 1 && String.class.isAssignableFrom(toBeChecked.getTypeParameters()[0].getGenericDeclaration());
+    }
+
     public static boolean isPrimitive(Class<?> toBeChecked) {
         return Primitives.isWrapperType(Primitives.wrap(toBeChecked)) || toBeChecked.equals(String.class);
     }
