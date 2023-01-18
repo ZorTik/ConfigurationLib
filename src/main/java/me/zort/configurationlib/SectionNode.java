@@ -129,7 +129,7 @@ public abstract class SectionNode<L> implements Node<L> {
         content.forEach(this::set);
     }
 
-    public void set(String key, Object value) {
+    public void set(String key, @Nullable Object value) {
         if(isContextDebug() && isHighestLevel()) {
             doLog("Highest level inspection:");
             doLog("Before update:");

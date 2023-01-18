@@ -74,8 +74,8 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     @Override
-    public void set(String key, Object value) {
-        if(value.getClass().equals(String[].class)) {
+    public void set(String key, @Nullable Object value) {
+        if(value != null && value.getClass().equals(String[].class)) {
             // String arrays are passed as simple nodes.
             set(key, createNode(key, Lists.newArrayList((String[]) value), NodeTypes.SIMPLE));
             return;
