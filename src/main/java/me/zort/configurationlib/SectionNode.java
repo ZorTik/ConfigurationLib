@@ -303,10 +303,17 @@ public abstract class SectionNode<L> implements Node<L> {
                 List list = new ArrayList();
                 ((SectionNode<Object>) node).getNodes(NodeTypes.SECTION)
                         .forEach(sn -> {
-                            list.add(sn.map(contentType));
+                            if (SectionNode.class.isAssignableFrom(contentType)) {
+                                list.add(sn);
+                            } else {
+                                list.add(sn.map(contentType));
+                            }
                         });
                 debug(String.format("Field %s is mapped to list of sections %s", field.getName(), list));
                 return list;
+            } else if (SectionNode.class.isAssignableFrom(field.getType())) {
+                value = node;
+                debug(String.format("Field %s is mapped to section node %s", field.getName(), value));
             } else {
                 value = ((SectionNode<L>) node).map(field.getType());
                 debug(String.format("Field %s is mapped to section node %s", field.getName(), value));
