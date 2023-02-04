@@ -10,6 +10,7 @@ import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.annotation.ThisNodeId;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
+import me.zort.configurationlib.util.ReflectionHelper;
 import me.zort.configurationlib.util.Validator;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -101,6 +102,15 @@ public abstract class SectionNode<L> implements Node<L> {
     }
 
     /**
+     * Creates and sets new section to the source.
+     *
+     * @param key The key/path of the section.
+     */
+    public void createSection(String key) {
+        set(key, createNode(key, null, NodeTypes.SECTION));
+    }
+
+    /**
      * Updates this node's values from the provided mapped
      * object.
      * This method does not create new nodes, only updates
@@ -187,6 +197,7 @@ public abstract class SectionNode<L> implements Node<L> {
         return map(typeClass, new Placeholders());
     }
 
+    @SuppressWarnings("rawtypes, unchecked")
     public <T> T map(Class<T> typeClass, Placeholders placeholders) {
         try {
             if(Primitives.isWrapperType(Primitives.wrap(typeClass))) {
@@ -194,9 +205,28 @@ public abstract class SectionNode<L> implements Node<L> {
                 // sections are not leaf nodes.
                 return null;
             }
-            Constructor<T> declaredConstructor = typeClass.getDeclaredConstructor();
-            declaredConstructor.setAccessible(true);
-            return map(declaredConstructor.newInstance(), placeholders);
+            try {
+                Constructor<T> declaredConstructor = typeClass.getDeclaredConstructor();
+                declaredConstructor.setAccessible(true);
+                return map(declaredConstructor.newInstance(), placeholders);
+            } catch(NoSuchMethodException e1) {
+                T instance = ReflectionHelper.newInstance(typeClass);
+
+                try {
+                    // Use custom pre-build strategy first to assure correct
+                    // object creation.
+                    NodeDeserializer deserializer = obtainAdapter(instance, NodeDeserializer.class);
+                    Object tempPreBuiltInstance;
+                    if (deserializer != null && (tempPreBuiltInstance = deserializer.preBuildInstance(typeClass, getContext(), placeholders)) != null) {
+                        instance = (T) tempPreBuiltInstance;
+                    }
+                } catch(Exception e2) {
+                    debug(e2.getMessage());
+                    if (isContextDebug()) e2.printStackTrace();
+                }
+
+                return map(instance, placeholders);
+            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
@@ -436,7 +466,7 @@ public abstract class SectionNode<L> implements Node<L> {
         return parent == null;
     }
 
-    private void debug(String message) {
+    public void debug(String message) {
         if (isContextDebug()) {
             getContextLogAdapter().log(Level.INFO, message);
         }
