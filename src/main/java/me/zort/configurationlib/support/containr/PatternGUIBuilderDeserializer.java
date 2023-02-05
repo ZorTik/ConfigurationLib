@@ -16,7 +16,8 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
     @SuppressWarnings("unchecked")
     @Override
     public @Nullable PatternGUIBuilder preBuildInstance(Class<PatternGUIBuilder> deserializeInto, NodeContext<Node<ConfigurationSection>, ConfigurationSection> context, Placeholders placeholders) {
-        String title = ChatColor.translateAlternateColorCodes('&', ((SimpleNode<ConfigurationSection>) context.get("title")).getAsString());
+        String title = placeholders.replace(((SimpleNode<ConfigurationSection>) context.get("title")).getAsString());
+        title = ChatColor.translateAlternateColorCodes('&', title);
         List<String> pattern = ((List<String>) ((SimpleNode<ConfigurationSection>) context.get("pattern")).get());
         String[] patternArray = new String[pattern.size()];
         int i = 0;
