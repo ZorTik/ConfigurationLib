@@ -13,7 +13,7 @@ public interface SimpleNode<L> extends Node<L> {
     }
 
     default String getAsString() throws ConfigurationException {
-        if (get() == null) throw new ConfigurationException(this, "Node " + getName() + " is null!");
+        if (get() == null) return null;
 
         if(!isString()) throw new ConfigurationException(this, "Node " + getName() + " is not string!");
         return (String) get();
