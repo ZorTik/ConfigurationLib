@@ -210,12 +210,12 @@ public abstract class SectionNode<L> implements Node<L> {
                 declaredConstructor.setAccessible(true);
                 return map(declaredConstructor.newInstance(), placeholders);
             } catch(NoSuchMethodException e1) {
-                T instance = ReflectionHelper.newInstance(typeClass);
+                T instance = null;
 
                 try {
                     // Use custom pre-build strategy first to assure correct
                     // object creation.
-                    NodeDeserializer deserializer = obtainAdapter(instance, NodeDeserializer.class);
+                    NodeDeserializer deserializer = obtainAdapter(typeClass, NodeDeserializer.class);
                     Object tempPreBuiltInstance;
                     if (deserializer != null && (tempPreBuiltInstance = deserializer.preBuildInstance(typeClass, getContext(), placeholders)) != null) {
                         instance = (T) tempPreBuiltInstance;
@@ -225,9 +225,12 @@ public abstract class SectionNode<L> implements Node<L> {
                     if (isContextDebug()) e2.printStackTrace();
                 }
 
+                if (instance == null)
+                    throw new RuntimeException("Cannot create instance of " + typeClass.getName() + "!");
+
                 return map(instance, placeholders);
             }
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
@@ -433,15 +436,20 @@ public abstract class SectionNode<L> implements Node<L> {
         return Primitives.isWrapperType(Primitives.wrap(clazz)) || String.class.equals(clazz);
     }
 
-    @SuppressWarnings("rawtypes, unchecked")
+    @SuppressWarnings("rawtypes")
     private <T extends NodeAdapter> T obtainAdapter(Object toBeSerialized, Class<T> adapterTypeClass) {
+        return obtainAdapter(toBeSerialized.getClass(), adapterTypeClass);
+    }
+
+    @SuppressWarnings("rawtypes, unchecked")
+    private <T extends NodeAdapter> T obtainAdapter(Class<?> toBeSerialized, Class<T> adapterTypeClass) {
         Validator.requireAnyType(adapterTypeClass, NodeSerializer.class, NodeDeserializer.class);
 
         // I allow users to define their own serializers.
         // @see NodeSerializer
         for (Class<?> aClass : adapters.keySet()) {
             NodeAdapter<?, L> nodeAdapter = adapters.get(aClass);
-            if(adapterTypeClass.isAssignableFrom(nodeAdapter.getClass()) && aClass.isAssignableFrom(toBeSerialized.getClass())) {
+            if(adapterTypeClass.isAssignableFrom(nodeAdapter.getClass()) && aClass.isAssignableFrom(toBeSerialized)) {
                 return (T) nodeAdapter;
             }
         }
