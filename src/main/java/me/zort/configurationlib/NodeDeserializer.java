@@ -2,6 +2,7 @@ package me.zort.configurationlib;
 
 import me.zort.configurationlib.util.Placeholders;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Node deserializer class.
@@ -10,6 +11,11 @@ import org.jetbrains.annotations.NotNull;
  * @author ZorTik
  */
 public interface NodeDeserializer<T, L> extends NodeAdapter<T, L> {
+
+    @Nullable
+    default T preBuildInstance(Class<T> deserializeInto, NodeContext<Node<L>, L> context, Placeholders placeholders) {
+        return null;
+    }
 
     /**
      * Deserializes the given context to deserializeInto object.

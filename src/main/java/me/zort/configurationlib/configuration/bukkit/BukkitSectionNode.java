@@ -1,12 +1,10 @@
 package me.zort.configurationlib.configuration.bukkit;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.adapter.DefaultItemAdapter;
-import me.zort.configurationlib.util.Colorizer;
-import me.zort.configurationlib.util.ItemValidator;
-import me.zort.configurationlib.util.NodeTypeToken;
-import me.zort.configurationlib.util.Placeholders;
+import me.zort.configurationlib.util.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static me.zort.configurationlib.util.Validator.isStringList;
 
 public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
 
@@ -49,7 +49,7 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     }
 
     @Override
-    public Node<ConfigurationSection> createNode(String key, Object value, NodeTypeToken<?> type) {
+    public Node<ConfigurationSection> createNode(String key, @Nullable Object value, NodeTypeToken<?> type) {
         Node<ConfigurationSection> node;
         if(type.equals(NodeTypes.SIMPLE)) {
             node = new BukkitSimpleNode(section, key, value);
@@ -64,6 +64,23 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     public void deleteNode(String key) {
         section.set(key, null);
         children.remove(key);
+    }
+
+    public boolean save() {
+        if(getParent() == null || !(getParent() instanceof BukkitSectionNode)) {
+            return false;
+        }
+        return ((BukkitSectionNode) getParent()).save();
+    }
+
+    @Override
+    public void set(String key, @Nullable Object value) {
+        if(value != null && value.getClass().equals(String[].class)) {
+            // String arrays are passed as simple nodes.
+            set(key, createNode(key, Lists.newArrayList((String[]) value), NodeTypes.SIMPLE));
+            return;
+        }
+        super.set(key, value);
     }
 
     @Override
@@ -90,12 +107,15 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Object buildValue(Field field, Node<ConfigurationSection> node, Placeholders placeholders) {
         // I'm specifying new field types for mapped objects.
-        /*if(field.getType().equals(ItemStack.class) && node instanceof BukkitSectionNode) {     // Replaced by DefaultItemDeserializer
-            return ((BukkitSectionNode) node).getAsItem(placeholders);
-        } else */if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
+        if(field.getType().equals(List.class) && node instanceof BukkitSimpleNode) {
             Object listCandidate = ((BukkitSimpleNode) node).get();
             if(listCandidate instanceof List) {
                 return listCandidate;
+            }
+        } else if(field.getType().equals(String[].class) && node instanceof BukkitSimpleNode) {
+            Object arrayCandidate = ((BukkitSimpleNode) node).get();
+            if(arrayCandidate instanceof String[]) {
+                return arrayCandidate;
             }
         }
         // TODO: Add support for other types.
@@ -128,10 +148,6 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
                     : ((SectionNode<ConfigurationSection>) current).get(key);
         }
         return current;
-    }
-
-    public boolean has(String path) {
-        return get(path) != null;
     }
 
     @Nullable
@@ -230,6 +246,11 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
     @Override
     public Collection<Node<ConfigurationSection>> getNodes() {
         return children.values();
+    }
+
+    public void setDebug(boolean debug, boolean reload) {
+        super.setDebug(debug);
+        if(reload) init();
     }
 
     private void init() {
