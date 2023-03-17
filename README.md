@@ -16,6 +16,7 @@ class Item {
 
 SectionNode<?> node = ...;
 node.set("items.item1", new User("Item 1", "The first item"));
+Item item = node.getSection("items.item1").map(Item.class);
 ```
 becomes
 ```yaml
@@ -24,6 +25,7 @@ items:
     name: Item 1
     description: The first item
 ```
+More on wiki!
 
 ## About
 This library is designed to help you build Bukkit configurations quick and easy. It has bunch of good features that you don't want to miss. You can see some of them through official wiki on this repository.
