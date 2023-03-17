@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 
 public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGUIBuilder, ConfigurationSection> {
 
-    private static final Pattern ACTION_PATTERN = Pattern.compile("\\[(.+)\\]\\s(.+)");
+    private static final Pattern ACTION_PATTERN = Pattern.compile("\\[(.+)\\]\\s?(.+)?");
     private static final Map<String, Action> ACTIONS = new ConcurrentHashMap<>();
 
     static {
@@ -82,7 +82,7 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
                             continue;
                         }
                         String action = matcher.group(1);
-                        String value = matcher.group(2);
+                        String value = matcher.groupCount() > 1 ? matcher.group(2) : "";
                         Action actionObject = ACTIONS.get(action);
                         if (actionObject == null) {
                             context.getNode().debug("Invalid action: " + action);
