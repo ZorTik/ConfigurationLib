@@ -2,49 +2,20 @@ package me.zort.configurationlib.support.containr;
 
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.BukkitSectionNode;
+import me.zort.configurationlib.support.containr.action.ActionParser;
 import me.zort.configurationlib.util.Placeholders;
 import me.zort.containr.ContextClickInfo;
 import me.zort.containr.SimpleElementBuilder;
 import me.zort.containr.builder.PatternGUIBuilder;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGUIBuilder, ConfigurationSection> {
-
-    private static final Pattern ACTION_PATTERN = Pattern.compile("\\[(.+)\\]\\s?(.+)?");
-    private static final Map<String, Action> ACTIONS = new ConcurrentHashMap<>();
-
-    static {
-        ACTIONS.put("player", (info, value) -> {
-            info.getPlayer().performCommand(value);
-        });
-        ACTIONS.put("console", (info, value) -> {
-            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), value);
-        });
-        ACTIONS.put("message", (info, value) -> {
-            info.getPlayer().sendMessage(value);
-        });
-        ACTIONS.put("close", (info, value) -> {
-            info.getPlayer().closeInventory();
-        });
-        ACTIONS.put("broadcast", (info, value) -> {
-            Bukkit.broadcastMessage(value);
-        });
-    }
-
-    interface Action {
-        void run(ContextClickInfo info, String value);
-    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -61,6 +32,7 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
         return new PatternGUIBuilder(title, patternArray);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public PatternGUIBuilder deserialize(@NotNull PatternGUIBuilder builder, NodeContext<Node<ConfigurationSection>, ConfigurationSection> context, Placeholders placeholders) {
         if (context.get("items") != null) {
@@ -75,20 +47,12 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
                 Consumer<ContextClickInfo> handleClick = (info) -> {};
 
                 if (item.has("onclick"))
-                    for (String actionString : (List<String>) item.getSimple("onclick").get()) {
-                        Matcher matcher = ACTION_PATTERN.matcher(actionString);
-                        if (!matcher.matches()) {
-                            context.getNode().debug("Invalid action string: " + actionString);
-                            continue;
-                        }
-                        String action = matcher.group(1);
-                        String value = matcher.groupCount() > 1 ? matcher.group(2) : "";
-                        Action actionObject = ACTIONS.get(action);
-                        if (actionObject == null) {
-                            context.getNode().debug("Invalid action: " + action);
-                            continue;
-                        }
-                        handleClick = handleClick.andThen(info -> actionObject.run(info, value));
+                    try {
+                        ActionParser parser = new ActionParser(((List<String>) item.getSimple("onclick").get()).toArray(new String[0]));
+                        handleClick = handleClick.andThen(info -> parser.run(info.getPlayer()));
+                    } catch(Exception e) {
+                        context.getNode().debug(e.getMessage());
+                        continue;
                     }
 
                 builder.andMark(mark, new SimpleElementBuilder()
