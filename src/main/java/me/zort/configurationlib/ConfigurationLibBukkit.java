@@ -5,6 +5,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public final class ConfigurationLibBukkit {
 
@@ -15,6 +16,10 @@ public final class ConfigurationLibBukkit {
     public static BukkitFileConfigurationNode of(File file, boolean create) {
         if((create && prepareDataFile(file) == null) || (!create && !file.exists())) return null;
         return new BukkitFileConfigurationNode(file);
+    }
+
+    public static BukkitFileConfigurationNode of(InputStream in) {
+        return new BukkitFileConfigurationNode(in);
     }
 
     public static File prepareDataFile(Plugin plugin, String name) {

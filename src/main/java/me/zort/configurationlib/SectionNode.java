@@ -10,7 +10,6 @@ import me.zort.configurationlib.annotation.NodeName;
 import me.zort.configurationlib.annotation.ThisNodeId;
 import me.zort.configurationlib.util.NodeTypeToken;
 import me.zort.configurationlib.util.Placeholders;
-import me.zort.configurationlib.util.ReflectionHelper;
 import me.zort.configurationlib.util.Validator;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -302,6 +301,27 @@ public abstract class SectionNode<L> implements Node<L> {
             }
         }
         return obj;
+    }
+
+    /**
+     * Merges values from provided section node to this node.
+     * Simply said, values that ARE in the provided node and ARE NOT in this node,
+     * are filled in this node with values from provided node.
+     *
+     * @param from The section node to merge from.
+     */
+    public void merge(SectionNode<L> from) {
+        for (Node<L> node : from.getNodes()) {
+            if (node instanceof SectionNode) {
+                SectionNode<L> sectionNode = (SectionNode<L>) node;
+                if (getSection(node.getName()) == null) {
+                    createSection(sectionNode.getName());
+                }
+                getSection(node.getName()).merge(sectionNode);
+            } else if(get(node.getName()) == null) {
+                set(node.getName(), node);
+            }
+        }
     }
 
     /**

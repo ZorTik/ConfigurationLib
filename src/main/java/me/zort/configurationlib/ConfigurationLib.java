@@ -5,6 +5,7 @@ import me.zort.configurationlib.configuration.virtual.VirtualSectionNode;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
+import java.io.InputStream;
 
 public final class ConfigurationLib {
 
@@ -17,6 +18,10 @@ public final class ConfigurationLib {
 
     public static BukkitFileConfigurationNode bukkit(Plugin plugin, String name) {
         return ConfigurationLibBukkit.of(ConfigurationLibBukkit.prepareDataFile(plugin, name));
+    }
+
+    public static BukkitFileConfigurationNode bukkit(InputStream in) {
+        return ConfigurationLibBukkit.of(in);
     }
 
     public static VirtualSectionNode virtual() {

@@ -5,6 +5,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class BukkitFileConfigurationNode extends BukkitSectionNode {
 
@@ -15,8 +17,16 @@ public class BukkitFileConfigurationNode extends BukkitSectionNode {
         this.file = file;
     }
 
+    public BukkitFileConfigurationNode(InputStream in) {
+        super(null, YamlConfiguration.loadConfiguration(new InputStreamReader(in)));
+        this.file = null;
+    }
+
     public boolean save() {
         putSelf(getSection());
+
+        if (file == null) return false;
+
         try {
             ((FileConfiguration) getSection()).save(file);
             return true;
