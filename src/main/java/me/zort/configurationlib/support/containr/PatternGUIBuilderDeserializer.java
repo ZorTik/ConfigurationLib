@@ -1,6 +1,6 @@
 package me.zort.configurationlib.support.containr;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.BukkitSectionNode;
 import me.zort.configurationlib.support.containr.action.ActionParser;
@@ -17,13 +17,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGUIBuilder, ConfigurationSection> {
 
-    private final Function<String, String> processor;
+    private final Function<String, String> actionsProcessor;
+    private final Function<String, String> linesProcessor;
+
+    private boolean identityProcessors = false;
 
     public PatternGUIBuilderDeserializer() {
-        this(Function.identity());
+        this(Function.identity(), Function.identity());
+        identityProcessors = true;
     }
 
 
@@ -59,7 +63,7 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
                 if (item.has("onclick"))
                     try {
                         ActionParser parser = new ActionParser(((List<String>) item.getSimple("onclick").get()).toArray(new String[0]));
-                        handleClick = handleClick.andThen(info -> parser.run(info.getPlayer(), processor));
+                        handleClick = handleClick.andThen(info -> parser.run(info.getPlayer(), actionsProcessor));
                     } catch(Exception e) {
                         context.getNode().debug(e.getMessage());
                         continue;
@@ -67,7 +71,7 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
 
                 builder.andMark(mark, new SimpleElementBuilder()
                         .click(handleClick)
-                        .item(item.getAsItem(placeholders))
+                        .item(identityProcessors ? item.getAsItem(placeholders) : item.getAsItem(linesProcessor))
                         .build());
             }
         }

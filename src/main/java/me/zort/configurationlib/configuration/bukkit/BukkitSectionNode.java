@@ -18,11 +18,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import static me.zort.configurationlib.util.Validator.isStringList;
 
@@ -155,11 +153,24 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         return getAsItem(new Placeholders());
     }
 
-    @Nullable
     public ItemStack getAsItem(Placeholders placeholders) {
+        return getAsItem(placeholders::replace);
+    }
+
+    @Nullable
+    public ItemStack getAsItem(Function<String, String> processor) {
         if(!ItemValidator.validate(section)) {
             return null;
         }
+
+        Function<List<String>, List<String>> applyList = list -> {
+            List<String> newList = new LinkedList<>();
+            for(String string : list) {
+                newList.add(processor.apply(string));
+            }
+            return newList;
+        };
+
         ItemStack item;
         ItemMeta meta;
         int amount = section.getInt("amount", 1);
@@ -183,10 +194,10 @@ public class BukkitSectionNode extends SectionNode<ConfigurationSection> {
         }
         if(meta != null) {
             if(section.contains("name")) meta.setDisplayName(
-                    placeholders.replace(Colorizer.colorize(section.getString("name")))
+                    processor.apply(Colorizer.colorize(section.getString("name")))
             );
             if(section.contains("lore")) meta.setLore(
-                    placeholders.replace(Colorizer.colorize(section.getStringList("lore")))
+                    applyList.apply(Colorizer.colorize(section.getStringList("lore")))
             );
             if(section.contains("enchanted") && section.getBoolean("enchanted")) {
                 meta.addEnchant(Enchantment.PROTECTION_ENVIRONMENTAL, 1, true);
