@@ -8,12 +8,15 @@ import me.zort.configurationlib.util.Placeholders;
 import me.zort.containr.ContextClickInfo;
 import me.zort.containr.builder.PatternGUIBuilder;
 import me.zort.containr.builder.SimpleElementBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -21,12 +24,13 @@ import java.util.function.Function;
 public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGUIBuilder, ConfigurationSection> {
 
     private final Function<String, String> actionsProcessor;
-    private final Function<String, String> linesProcessor;
+    // Player is present only if %player% placeholder is present in Placeholders map
+    private final BiFunction<@Nullable Player, String, String> linesProcessor;
 
     private boolean identityProcessors = false;
 
     public PatternGUIBuilderDeserializer() {
-        this(Function.identity(), Function.identity());
+        this(Function.identity(), (p, s) -> s);
         identityProcessors = true;
     }
 
@@ -71,7 +75,14 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
 
                 builder.andMark(mark, new SimpleElementBuilder()
                         .click(handleClick)
-                        .item(identityProcessors ? item.getAsItem(placeholders) : item.getAsItem(linesProcessor))
+                        .item(identityProcessors ? item.getAsItem(placeholders) : item.getAsItem(s -> {
+                            Object nickname = placeholders.get("%player%");
+                            Player player = null;
+                            if (nickname instanceof String) {
+                                player = Bukkit.getPlayer((String) nickname);
+                            }
+                            return linesProcessor.apply(player, s);
+                        }))
                         .build());
             }
         }

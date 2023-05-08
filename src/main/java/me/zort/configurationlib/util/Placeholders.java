@@ -13,7 +13,7 @@ public class Placeholders extends HashMap<String, Object> {
 
     public String replace(String s) {
         for(String placeholder : keySet()) {
-            s = s.replaceAll(placeholder, getOrDefault(placeholder, "").toString());
+            s = s.replace(placeholder, getOrDefault(placeholder, "").toString());
         }
         return s;
     }
