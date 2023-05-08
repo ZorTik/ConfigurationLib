@@ -32,9 +32,9 @@ public final class ActionParser {
         run(player, Function.identity());
     }
 
-    public void run(Player player, @NotNull Function<String, String> formatter) {
+    public void run(Player player, @NotNull Function<String, String> processor) {
         for (ParseResult result : results) {
-            result.action.run(player, formatter.apply(result.value));
+            result.action.run(player, processor.apply(result.value));
         }
     }
 

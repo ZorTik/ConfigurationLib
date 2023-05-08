@@ -1,5 +1,6 @@
 package me.zort.configurationlib.support.containr;
 
+import lombok.AllArgsConstructor;
 import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.BukkitSectionNode;
 import me.zort.configurationlib.support.containr.action.ActionParser;
@@ -14,8 +15,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
+@AllArgsConstructor
 public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGUIBuilder, ConfigurationSection> {
+
+    private final Function<String, String> processor;
+
+    public PatternGUIBuilderDeserializer() {
+        this(Function.identity());
+    }
+
 
     @SuppressWarnings("unchecked")
     @Override
@@ -49,7 +59,7 @@ public class PatternGUIBuilderDeserializer implements NodeDeserializer<PatternGU
                 if (item.has("onclick"))
                     try {
                         ActionParser parser = new ActionParser(((List<String>) item.getSimple("onclick").get()).toArray(new String[0]));
-                        handleClick = handleClick.andThen(info -> parser.run(info.getPlayer()));
+                        handleClick = handleClick.andThen(info -> parser.run(info.getPlayer(), processor));
                     } catch(Exception e) {
                         context.getNode().debug(e.getMessage());
                         continue;
