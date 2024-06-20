@@ -4,7 +4,7 @@ import me.zort.configurationlib.*;
 import me.zort.configurationlib.configuration.bukkit.BukkitSectionNode;
 import me.zort.configurationlib.util.Placeholders;
 import me.zort.containr.ContextClickInfo;
-import me.zort.containr.SimpleElementBuilder;
+import me.zort.containr.builder.SimpleElementBuilder;
 import me.zort.containr.builder.PatternGUIBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
